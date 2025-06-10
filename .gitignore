@@ -1,0 +1,15 @@
+# Built application files
+.hbmk
+.DS_Store
+.DS_Store?
+._*
+.vscode
+.Spotlight-V100
+.Trashes
+.cache
+.idea
+.dev
+ehthumbs.db
+Thumbs.db
+error.log
+bin

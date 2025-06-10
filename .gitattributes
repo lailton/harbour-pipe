@@ -1,0 +1,10 @@
+# Harbour Language
+*.prg     linguist-language=Harbour
+*.PRG     linguist-language=Harbour
+*.ch      linguist-language=Harbour
+*.hb      linguist-language=Harbour
+*.hbc     linguist-language=Harbour
+*.hbm     linguist-language=Harbour
+*.hbp     linguist-language=Harbour
+*.hbx     linguist-language=Harbour
+*.hbr     linguist-language=Harbour
