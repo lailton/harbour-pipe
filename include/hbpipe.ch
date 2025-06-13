@@ -13,4 +13,7 @@
 	#define ERROR_PIPE_EMPTY                   246 // Read attempted on empty pipe with non-blocking mode.
 	#define ERROR_MORE_DATA                    234 // More data is available (e.g., message exceeds buffer).
 
+	#define ERROR_IO_PENDING                   997 // Overlapped I/O operation is in progress.
+	#define ERROR_INVALID_HANDLE                 6 // The handle is invalid.
+
 #endif

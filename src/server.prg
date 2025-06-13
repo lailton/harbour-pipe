@@ -37,10 +37,20 @@ function PIPE_Handler( pPtr )
 		cBuffer := nil
 		lResult := PIPE_Read( pPtr, @cBuffer )
 
+		if !lResult
+			nError := PIPE_Error()
+			if nError == ERROR_NO_DATA .or. nError == ERROR_BROKEN_PIPE
+				exit
+			endif
+		endif
+
 		if hb_isString( cBuffer )
 			? "cBuffer: ", cBuffer
 			cSent := "Received! " + time() + " " + alltrim( str( ++nReceive ) )
-			if !PIPE_Write( pPtr, cSent )
+			if PIPE_Write( pPtr, cSent )
+				PIPE_Flush( pPtr )
+				? "sent: ", cSent
+			else
 				nError := PIPE_Error()
 				if nError == ERROR_NO_DATA .or. nError == ERROR_BROKEN_PIPE
 					exit
@@ -49,15 +59,6 @@ function PIPE_Handler( pPtr )
 				endif
 			endif
 		endif
-
-		if !lResult
-			nError := PIPE_Error()
-			if nError == ERROR_NO_DATA .or. nError == ERROR_BROKEN_PIPE
-				exit
-			endif
-		endif
-
-		hb_idleSleep( 1 )
 
 	enddo
 

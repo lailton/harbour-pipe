@@ -9,73 +9,70 @@
 function main()
 
 	local pPtr := Pipe_Connect( "\\.\pipe\Harbour" )
-	local pMessage, nError
+	local nNum, aMessage
+	local lMT := hb_mtvm()
+	local pThread, cBuffer
+	local nError
 
 	if hb_isPointer( pPtr )
 
-		if hb_mtvm()
-			pMessage := hb_threadStart( @PIPE_Message(), pPtr )
+		if lMT
+			pThread := hb_threadStart( @Pipe_Message(), pPtr )
 		endif
 
-		hb_idleSleep( 0.5 )
-		if !Pipe_Write( pPtr, "Hello from Client side" )
-			? "Error: ", PIPE_Error()
-		endif
+		aMessage := {}
+		aadd( aMessage, "Hello from Client side" )
+		aadd( aMessage, "Are you there?" )
+		aadd( aMessage, "It is a test" )
+		aadd( aMessage, replicate( "X", 5 * 1024 ) + "it is an extra testing..." )
+		aadd( aMessage, "Closing" )
+		aadd( aMessage, "Good Bye" )
 
-		hb_idleSleep( 0.5 )
-		if !Pipe_Write( pPtr, "Are you there?" )
-			? "Error: ", PIPE_Error()
-		endif
+		for nNum := 1 to len( aMessage )
+			if Pipe_Write( pPtr, aMessage[ nNum ] )
+				Pipe_Flush( pPtr )
+				if !lMT
+					if Pipe_Read( pPtr, @cBuffer )
+						? "cBuffer: ", cBuffer
+					else
+						nError := Pipe_Error( @pPtr )
+						if nError != ERROR_IO_PENDING
+							? "nError: ", nError
+						endif
+					endif
+				endif
+			endif
+		next
 
+		Pipe_Flush( pPtr )
 
-		hb_idleSleep( 0.5 )
-		if !Pipe_write( pPtr, "It is a test" )
-			? "Error: ", PIPE_Error()
-		endif
+		if lMT
 
+			? "5s to finish thread read"
 
-		hb_idleSleep( 0.5 )
-		if !Pipe_write( pPtr, replicate( "X", 5 * 1024 ) + "it is an extra testing..." ) // Long
-			? "Error: ", PIPE_Error()
-		endif
-
-
-		hb_idleSleep( 0.5 )
-		if !Pipe_write( pPtr, "Closing" )
-			? "Error: ", PIPE_Error()
-		endif
-
-
-		hb_idleSleep( 0.5 )
-		if !Pipe_write( pPtr, "Good Bye" )
-			? "Error: ", PIPE_Error()
-		endif
-
-		if hb_mtvm()
-			hb_idleSleep( 0.5 )
-			hb_threadQuitRequest( pMessage )
+			hb_idleSleep( 5 )
+			hb_threadQuitRequest( pThread )
 			hb_threadWaitForAll()
-		endif
 
-		hb_idleSleep( 4 )
+		endif
 
 		Pipe_Free( pPtr )
 
 	else
 
-		nError := PIPE_Error()
+		nError := Pipe_Error()
 		if nError == ERROR_PIPE_BUSY
 			? "Pipe Busy - Probably already in use"
 			? "Use server-mt for multiple access"
 		else
-			? "Error: ", PIPE_Error()
+			? "Error: ", Pipe_Error()
 		endif
 
 	endif
 
 return nil
 
-function PIPE_Message( pPtr )
+function Pipe_Message( pPtr )
 
 	local cBuffer
 	local nError
@@ -84,14 +81,14 @@ function PIPE_Message( pPtr )
 
 		cBuffer := nil
 
-		if PIPE_Read( pPtr, @cBuffer )
+		if Pipe_Read( pPtr, @cBuffer )
 			if hb_isString( cBuffer )
 				? "cBuffer: ", cBuffer
 			endif
 		else
-			nError := PIPE_Error()
-			if nError != 187
-				? nError
+			nError := Pipe_Error()
+			if nError != ERROR_IO_PENDING
+				? "nError: ", nError
 			endif
 		endif
 
